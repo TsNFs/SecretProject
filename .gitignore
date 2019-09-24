@@ -1,2 +1,7 @@
 .idea
 constant/__pycache__
+nn/xkf_nn_logs
+nn/xkf_nn_model
+nn/__pycache__
+util/__pycache__
+tsne.png

@@ -37,13 +37,18 @@ def build_unified_file(id_label_dict):
     # for human
     count = 0
     #
-    with open(TEST_DATA_FILE, encoding='utf-8') as train_data:
+    with open(TRAIN_DATA_FILE, encoding='utf-8') as train_data:
         with open(UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
             unified_file.write('id,title,content,label\n')
             data = csv.reader(train_data)
             for row in islice(data, 1, None):
                 if row[ID_LOC] in id_label_dict:
                     count += 1
+                    print(row[TITLE_LOC])
+                    if row[TITLE_LOC].startswith('为挽救'):
+                        print(row[CONTENT_LOC])
+                        print("!!!")
+                    print(id_label_dict[row[ID_LOC]])
                     unified_file.write(row[ID_LOC] + ','
                                        + row[TITLE_LOC] + ','
                                        + row[CONTENT_LOC] + ','

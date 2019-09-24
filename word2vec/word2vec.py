@@ -8,12 +8,9 @@ import random
 import tensorflow as tf
 import re
 import pickle
-from constant.system_path import TRAIN_DATA_FILE, TEST_DATA_FILE, FONT_FILE
+from constant.system_path import TRAIN_DATA_FILE, TEST_DATA_FILE, FONT_FILE,DICT_TXT,EMBEDDING_TXT
 from constant.constant import CONTENT_LOC
 
-DICT_TXT = '../data/dump_dict.txt'
-
-EMBEDDING_TXT = '../data/dump_embedding.txt'
 
 STOP_WORD_FILE = 'data/stop_words.txt'
 
@@ -199,7 +196,7 @@ with graph.as_default():
     init = tf.global_variables_initializer()
 
 # Step 5: Begin training.
-num_steps = 100000
+num_steps = 20000
 with tf.Session(graph=graph) as session:
     # We must initialize all variables before we use them.
     init.run()
