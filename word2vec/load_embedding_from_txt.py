@@ -65,12 +65,12 @@ if __name__ == '__main__':
             row = line.split(' ')
             cur_embedding = []
             # for dirty in data
-            try:
+            if len(row) == EMBEDDING_SIZE + 1:
                 for i in range(1, EMBEDDING_SIZE + 1):
                     cur_embedding.append(float(row[i]))
                 dictionary[row[0]] = len(dictionary)
                 final_embedding.append(cur_embedding)
-            except:
+            else:
                 print('error at line : ' + str(count) + line)
             line = f.readline()
 
