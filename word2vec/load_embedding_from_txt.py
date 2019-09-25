@@ -77,9 +77,9 @@ if __name__ == '__main__':
     final_embedding = np.array(final_embedding)
     # dump the data
     f = open(EMBEDDING_TXT, 'wb')
-    pickle.dump(final_embedding, f)
+    pickle.dump(final_embedding, f, protocol=4)
     f.close()
 
     f = open(DICT_TXT, 'wb')
-    pickle.dump(dictionary, f)
+    pickle.dump(dictionary, f, protocol=4)
     f.close()
