@@ -1,9 +1,12 @@
+import sys
+
+sys.path.append('/home/lcy/nlp/SecretProject')
 import csv
 
 from itertools import islice
 
 import util.generate_batch as generator
-from constant.constant import CONTENT_LOC, ID_LOC
+from constant.constant import CONTENT_LOC, ID_LOC, EMBEDDING_SIZE
 from constant.system_path import TEST_DATA_FILE
 import tensorflow as tf
 
@@ -17,7 +20,7 @@ class Predictor:
         self.dictionary, self.embedding, _ = generator.get_dictionary_and_embedding()
         self.nn_model = NN()
         self.sess = self.load_model()
-        self.embedding_size = 128
+        self.embedding_size = EMBEDDING_SIZE
 
     # content -> label
     def predict(self, content):
