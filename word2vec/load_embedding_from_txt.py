@@ -1,9 +1,11 @@
+import sys
+sys.path.append('/home/lcy/nlp/SecretProject')
+
+from constant.constant import EMBEDDING_SIZE
 from constant.system_path import TENCENT_EMBEDDING_LOC, EMBEDDING_TXT, DICT_TXT
 import numpy as np
 import pickle
 
-
-EMBEDDING_SIZE = 200
 
 if __name__ == '__main__':
     dictionary = {}
