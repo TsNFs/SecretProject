@@ -25,6 +25,7 @@ if __name__ == '__main__':
             for i in range(1, EMBEDDING_SIZE + 1):
                 cur_embedding.append(float(row[i]))
             embedding.append(cur_embedding)
+            line = f.readline()
 
     final_embedding = np.array(embedding)
 
