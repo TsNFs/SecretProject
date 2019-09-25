@@ -10,6 +10,7 @@ import pickle
 if __name__ == '__main__':
     count = 0
     dictionary = {}
+    flag = False
     final_embedding = []
     with open(TENCENT_EMBEDDING_LOC, encoding='utf-8') as f:
         # jump the first row
@@ -27,8 +28,9 @@ if __name__ == '__main__':
                     cur_embedding.append(float(row[i]))
                 dictionary[row[0]] = len(dictionary)
                 embedding = [cur_embedding]
-                if len(final_embedding) == 0:
+                if not flag:
                     final_embedding = np.array(embedding)
+                    flag = True
                 else:
                     final_embedding = np.row_stack((final_embedding, embedding))
             except:
