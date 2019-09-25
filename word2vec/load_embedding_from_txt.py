@@ -18,7 +18,7 @@ if __name__ == '__main__':
         while line:
             count += 1
             if count % 1000 == 0:
-                print('cur: ' + count)
+                print('cur: ' + str(count))
             row = line.split(' ')
             dictionary[row[0]] = len(dictionary)
             cur_embedding = []
