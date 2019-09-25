@@ -24,7 +24,7 @@ class Predictor:
 
     # content -> label
     def predict(self, content):
-        x = generator.change_content_to_vector(content, self.dictionary, self.embedding)
+        x = generator.change_content_to_vector(content, self.embedding, self.dictionary)
         x = x.reshape([1, self.embedding_size])
         result = self.sess.run(self.nn_model.result, feed_dict={self.nn_model.x: x, self.nn_model.keep_prob: 1.0})
         return result
