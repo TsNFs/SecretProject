@@ -56,6 +56,7 @@ def get_fact():
                         result.append(word)
             result.append('+')
 
+
     print('begin reading test file')
     with open(TEST_DATA_FILE, "r", encoding="UTF-8") as test_data:
         content = [row[CONTENT_LOC] for row in csv.reader(test_data)][1:]

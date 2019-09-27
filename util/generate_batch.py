@@ -6,13 +6,14 @@ import pickle
 import numpy as np
 import datetime
 
-from constant.system_path import TRAIN_DATA_FILE, TEST_DATA_FILE, FONT_FILE, DICT_TXT, EMBEDDING_TXT, \
-    GENERATE_TRAIN_FILE
-from constant.constant import CONTENT_LOC, TRAIN_LABEL_LOC, NUM_OF_CLASS
+from constant.system_path import DICT_TXT, EMBEDDING_TXT, GENERATE_TRAIN_FILE
+from constant.constant import CONTENT_LOC, TRAIN_LABEL_LOC, NUM_OF_CLASS, EMBEDDING_SIZE
 
 # param
-embedding_size = 128
+embedding_size = EMBEDDING_SIZE
 batch_size = 128
+hit = 0
+miss = 0
 
 
 def get_dictionary_and_embedding():
@@ -25,12 +26,17 @@ def get_dictionary_and_embedding():
 
 
 def change_content_to_vector(content, embedding, dictionary):
+    global hit
+    global miss
     result = np.zeros(embedding_size)
     count = 0
     for word in list(jieba.cut(content, cut_all=False)):
         if word in dictionary:
+            hit += 1
             count = count + 1
             result += embedding[dictionary[word]]
+        else:
+            miss += 1
 
     if count != 0:
         result = result / count
@@ -71,6 +77,7 @@ def build_data_to_x_y(embedding, dictionary):
         result_y[i] = change_label_to_one_hot(data_y[i], NUM_OF_CLASS)
 
     print(datetime.datetime.now() - time)
+    print('hit ' + str(hit) + ' miss ' + str(miss))
     return result_x, result_y
 
 
@@ -88,7 +95,6 @@ def generate_batch(data_x, data_y):
         y[i] = data_y[index]
 
     return x, y
-
 
 # word_dict, embedding, reverse_dictionary = get_dictionary_and_embedding()
 # accu_dict, reverse_accu_dict = read_accu()

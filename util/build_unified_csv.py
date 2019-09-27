@@ -1,8 +1,9 @@
 import csv
+import re
 
 from itertools import islice
 
-from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE,TEST_DATA_FILE
+from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE
 from constant.constant import ID_LOC, TITLE_LOC, CONTENT_LOC, LABEL_LOC
 
 UNIFIED_FILE = '../data/train.csv'
@@ -44,17 +45,25 @@ def build_unified_file(id_label_dict):
             for row in islice(data, 1, None):
                 if row[ID_LOC] in id_label_dict:
                     count += 1
-                    print(row[TITLE_LOC])
-                    if row[TITLE_LOC].startswith('为挽救'):
-                        print(row[CONTENT_LOC])
-                        print("!!!")
-                    print(id_label_dict[row[ID_LOC]])
                     unified_file.write(row[ID_LOC] + ','
                                        + row[TITLE_LOC] + ','
-                                       + row[CONTENT_LOC] + ','
+                                       + content_filter(row[CONTENT_LOC]) + ','
                                        + id_label_dict[row[ID_LOC]]
                                        + '\n')
     print('total data count: ' + str(count))
+
+
+# for data clean
+def content_filter(content):
+    # remove tag
+    content = re.sub(re.compile(r"[~<>.{}\[\]\-\'\"\\(\\n)\(\)/;:?|_=+*%\s]", re.S), "", content)
+    # remove english and number
+    content = re.sub(re.compile(r"[qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890]", re.S), "", content)
+    # remove connected ""
+    content = re.sub(re.compile(r"(”){2,}", re.S), "", content)
+    content = re.sub(re.compile(r"\s”", re.S), "", content)
+
+    return content
 
 
 if __name__ == '__main__':

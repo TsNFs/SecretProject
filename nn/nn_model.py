@@ -1,14 +1,17 @@
 import tensorflow as tf
 
 ##
+from constant.constant import EMBEDDING_SIZE
+
+
 class NN:
     def __init__(self):
         # 参数设置
         self.training_batch_size = 128
         self.valid_batch_size = 256
         self.iteration = 100000
-        # embediing size = 128
-        self.input_size = 128
+        # embediing size
+        self.input_size = EMBEDDING_SIZE
         # accu_size = 203
         self._output_size = 4
         # 多标签预测返回的个数

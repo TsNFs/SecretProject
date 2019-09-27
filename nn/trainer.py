@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/home/lcy/nlp/SecretProject')
 ##############################################
 # train part don't place it in the predictor #
 ##############################################
@@ -6,7 +8,6 @@ import tensorflow as tf
 
 training_batch_size = 256
 valid_batch_size = 256
-embedding_size = 128
 iteration = 100000
 ##
 

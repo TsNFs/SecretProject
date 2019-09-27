@@ -6,4 +6,5 @@ FONT_FILE = '/System/Library/Fonts/PingFang.ttc'
 DICT_TXT = '../data/dump_dict.txt'
 EMBEDDING_TXT = '../data/dump_embedding.txt'
 GENERATE_TRAIN_FILE = '../data/train.csv'
-
+# embedding loc
+TENCENT_EMBEDDING_LOC = '../../word.txt'
