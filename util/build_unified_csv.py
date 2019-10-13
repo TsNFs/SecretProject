@@ -6,7 +6,8 @@ from itertools import islice
 from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE
 from constant.constant import ID_LOC, TITLE_LOC, CONTENT_LOC, LABEL_LOC
 
-UNIFIED_FILE = '../data/train.csv'
+TRAIN_UNIFIED_FILE = '../data/train.csv'
+TEST_UNIFIED_FILE = '../data/test.csv'
 
 
 ##
@@ -39,17 +40,34 @@ def build_unified_file(id_label_dict):
     count = 0
     #
     with open(TRAIN_DATA_FILE, encoding='utf-8') as train_data:
-        with open(UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
-            unified_file.write('id,title,content,label\n')
+        with open(TRAIN_UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
+            unified_file.write('id\ttitle\tcontent\tlabel\n')
             data = csv.reader(train_data)
             for row in islice(data, 1, None):
                 if row[ID_LOC] in id_label_dict:
                     count += 1
-                    unified_file.write(row[ID_LOC] + ','
-                                       + row[TITLE_LOC] + ','
-                                       + content_filter(row[CONTENT_LOC]) + ','
+                    unified_file.write(row[ID_LOC] + '\t'
+                                       + content_filter(row[TITLE_LOC]) + '\t'
+                                       + content_filter(row[CONTENT_LOC]) + '\t'
                                        + id_label_dict[row[ID_LOC]]
                                        + '\n')
+    print('total data count: ' + str(count))
+
+
+def build_test_file():
+    # for human
+    count = 0
+    #
+    with open(TEST_DATA_FILE, encoding='utf-8') as test_data:
+        with open(TEST_UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
+            unified_file.write('id\ttitle\tcontent\n')
+            data = csv.reader(test_data)
+            for row in islice(data, 1, None):
+                count += 1
+                unified_file.write(row[ID_LOC] + '\t'
+                                   + content_filter(row[TITLE_LOC]) + '\t'
+                                   + content_filter(row[CONTENT_LOC])
+                                   + '\n')
     print('total data count: ' + str(count))
 
 
@@ -68,3 +86,4 @@ def content_filter(content):
 
 if __name__ == '__main__':
     build_unified_file(build_id_label_dict())
+    build_test_file()
