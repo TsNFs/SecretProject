@@ -1,9 +1,11 @@
 import csv
 import re
+import jieba
 
 from itertools import islice
 
-from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE
+from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE, PYTORCH_TRAIN_FILE, \
+    PYTORCH_TEST_FILE
 from constant.constant import ID_LOC, TITLE_LOC, CONTENT_LOC, LABEL_LOC
 
 TRAIN_UNIFIED_FILE = '../data/train.csv'
@@ -84,6 +86,30 @@ def content_filter(content):
     return content
 
 
+# transfer train data to title + label
+def transfer_train_data(form_path, to_path):
+    with open(form_path, encoding='utf-8') as data:
+        with open(to_path, 'w', encoding='utf-8') as file:
+            data = csv.reader(data, delimiter='\t')
+            for row in islice(data, 1, None):
+                #print(row)
+                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t'
+                           + row[3] + '\n')
+
+
+# transfer test data to title + label
+def transfer_test_data(form_path, to_path):
+    with open(form_path, encoding='utf-8') as data:
+        with open(to_path, 'w', encoding='utf-8') as file:
+            data = csv.reader(data, delimiter='\t')
+            for row in islice(data, 1, None):
+                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t' + '1\n')
+
+def word_cut(content):
+    return ' '.join(jieba.cut(content))
+
 if __name__ == '__main__':
     build_unified_file(build_id_label_dict())
     build_test_file()
+    transfer_train_data(TRAIN_UNIFIED_FILE, PYTORCH_TRAIN_FILE)
+    transfer_test_data(TEST_UNIFIED_FILE, PYTORCH_TEST_FILE)
