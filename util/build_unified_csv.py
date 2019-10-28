@@ -1,11 +1,13 @@
 import csv
 import re
+from random import random
+
 import jieba
 
 from itertools import islice
 
 from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE, PYTORCH_TRAIN_FILE, \
-    PYTORCH_TEST_FILE
+    PYTORCH_TEST_FILE, PYTORCH_DEV_FILE
 from constant.constant import ID_LOC, TITLE_LOC, CONTENT_LOC, LABEL_LOC
 
 TRAIN_UNIFIED_FILE = '../data/train.csv'
@@ -92,8 +94,8 @@ def transfer_train_data(form_path, to_path):
         with open(to_path, 'w', encoding='utf-8') as file:
             data = csv.reader(data, delimiter='\t')
             for row in islice(data, 1, None):
-                #print(row)
-                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t'
+                # print(row)
+                file.write(content_filter(row[1]) + ',' + content_filter(row[2]) + '\t'
                            + row[3] + '\n')
 
 
@@ -103,13 +105,25 @@ def transfer_test_data(form_path, to_path):
         with open(to_path, 'w', encoding='utf-8') as file:
             data = csv.reader(data, delimiter='\t')
             for row in islice(data, 1, None):
-                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t' + '1\n')
+                file.write(content_filter(row[1]) + ',' + content_filter(row[2]) + '\t' + '1\n')
+
 
 def word_cut(content):
     return ' '.join(jieba.cut(content))
+
+
+def build_valid_data():
+    with open(PYTORCH_TRAIN_FILE, encoding='utf-8') as data:
+        with open(PYTORCH_DEV_FILE, 'w', encoding='utf-8') as file:
+            data = csv.reader(data, delimiter='\t')
+            for row in islice(data, 0, None):
+                if random() > 0.9:
+                    file.write(row[0] + '\t' + row[1] + '\n')
+
 
 if __name__ == '__main__':
     build_unified_file(build_id_label_dict())
     build_test_file()
     transfer_train_data(TRAIN_UNIFIED_FILE, PYTORCH_TRAIN_FILE)
     transfer_test_data(TEST_UNIFIED_FILE, PYTORCH_TEST_FILE)
+    build_valid_data()

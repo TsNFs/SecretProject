@@ -9,10 +9,11 @@ from itertools import islice
 from sklearn import metrics
 import time
 from utils import get_time_dif
+from constant.system_path import TEST_UNIFIED_FILE
 from tensorboardX import SummaryWriter
 
+
 RESULT_DATA_FILE = 'result.csv'
-TEST_UNIFIED_FILE = '../data/test.csv'
 
 
 # 权重初始化，默认xavier
@@ -48,17 +49,13 @@ def train(config, model, train_iter, dev_iter, test_iter):
         print('Epoch [{}/{}]'.format(epoch + 1, config.num_epochs))
         # scheduler.step() # 学习率衰减
         for i, (trains, labels) in enumerate(train_iter):
-            if trains[0].shape[0] == 0:
-                break
-            # trains = trains[0].view(trains[0].shape[0], config.pad_size)
-            # time.sleep(100000)
-            optimizer.zero_grad()
+            print(trains.shape)
             outputs = model(trains)
+            model.zero_grad()
             loss = F.cross_entropy(outputs, labels)
-            # print(type(outputs), type(outputs[0]), outputs[0].shape, outputs[1].shape)
             loss.backward()
             optimizer.step()
-            if total_batch % 100 == 0:
+            if total_batch % 20 == 0:
                 # 每多少轮输出在训练集和验证集上的效果
                 true = labels.data.cpu()
                 predic = torch.max(outputs.data, 1)[1].cpu()
@@ -114,16 +111,11 @@ def evaluate(config, model, data_iter, test=False):
     labels_all = np.array([], dtype=int)
     with torch.no_grad():
         for texts, labels in data_iter:
-            if texts[0].shape[0] == 0:
-                break
-            # texts = texts[0].view(texts[0].shape[0], config.pad_size)
             outputs = model(texts)
             loss = F.cross_entropy(outputs, labels)
-            # outputs = outputs[1]
             loss_total += loss
             labels = labels.data.cpu().numpy()
             predic = torch.max(outputs.data, 1)[1].cpu().numpy()
-
             labels_all = np.append(labels_all, labels)
             predict_all = np.append(predict_all, predic)
 
@@ -140,11 +132,7 @@ def predict(model, data_iter):
     predict_all = np.array([], dtype=int)
     with torch.no_grad():
         for texts, fake_label in data_iter:
-            if texts[0].shape[0] == 0:
-                break
-            # texts = texts[0].view(texts[0].shape[0], 200)
             outputs = model(texts)
-            # outputs = outputs[0]
             predict = torch.max(outputs.data, 1)[1].cpu().numpy()
             predict_all = np.append(predict_all, predict)
 

@@ -29,7 +29,7 @@ class Config(object):
         self.n_vocab = 0                                                # 词表大小，在运行时赋值
         self.num_epochs = 20                                             # epoch数
         self.batch_size = 128                                           # mini-batch大小
-        self.pad_size = 32                                              # 每句话处理成的长度(短填长切)
+        self.pad_size = 64                                              # 每句话处理成的长度(短填长切)
         self.learning_rate = 1e-3                                       # 学习率
         self.embed = self.embedding_pretrained.size(1)\
             if self.embedding_pretrained is not None else 300           # 字向量维度
@@ -58,8 +58,14 @@ class Model(nn.Module):
         return x
 
     def forward(self, x):
+        print(x[0].shape)
+        print(x[0])
         out = self.embedding(x[0])
+        print(out.shape)
         out = out.unsqueeze(1)
+        print(out.shape)
+        exit(-1)
+
         out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
         out = self.dropout(out)
         out = self.fc(out)

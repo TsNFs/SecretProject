@@ -2,16 +2,21 @@
 import time
 import torch
 import numpy as np
+from transformers import BertModel,BertForSequenceClassification
+from models.BERT import BERT_Classifyer
+
 from train_eval import train, init_network, test
 from importlib import import_module
 import argparse
 
+pretrained_model = '../torch_bert/data'
+
 parser = argparse.ArgumentParser(description='Chinese Text Classification')
-parser.add_argument('--model', type=str, required=True, help='choose a model: TextCNN, TextRNN, FastText, TextRCNN, TextRNN_Att, DPCNN, Transformer')
+parser.add_argument('--model', type=str, required=True,
+                    help='choose a model: TextCNN, TextRNN, FastText, TextRCNN, TextRNN_Att, DPCNN, Transformer')
 parser.add_argument('--embedding', default='pre_trained', type=str, help='random or pre_trained')
 parser.add_argument('--word', default=False, type=bool, help='True for word, False for char')
 args = parser.parse_args()
-
 
 if __name__ == '__main__':
     dataset = 'THUCNews'  # 数据集
@@ -22,7 +27,8 @@ if __name__ == '__main__':
         embedding = 'random'
     model_name = args.model  # 'TextRCNN'  # TextCNN, TextRNN, FastText, TextRCNN, TextRNN_Att, DPCNN, Transformer
     if model_name == 'FastText':
-        from utils_fasttext import build_dataset, build_iterator, get_time_dif
+        #from ChineseTextClassificationPytorch.utils_fasttext import build_dataset, build_iterator, get_time_dif
+
         embedding = 'random'
     else:
         from utils import build_dataset, build_iterator, get_time_dif
@@ -43,15 +49,15 @@ if __name__ == '__main__':
         break
     dev_iter = build_iterator(dev_data, config)
     test_iter = build_iterator(test_data, config)
-
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
 
     # train
     config.n_vocab = len(vocab)
     print(config.device)
-    model = x.Model(config).to(config.device)
-    if model_name != 'Transformer':
-        init_network(model)
+    model = BertModel.from_pretrained(pretrained_model)
+    model = BERT_Classifyer(model).to(config.device)
+    # if model_name != 'Transformer':
+    #     init_network(model)
     print(model.parameters)
     train(config, model, train_iter, dev_iter, test_iter)

@@ -6,9 +6,18 @@ import pickle as pkl
 from tqdm import tqdm
 import time
 from datetime import timedelta
+from transformers import *
+
 
 MAX_VOCAB_SIZE = 10000  # 词表长度限制
 UNK, PAD = '<UNK>', '<PAD>'  # 未知字，padding符号
+
+
+pretrained_model = '../torch_bert/data'
+# Models can return full list of hidden-states & attentions weights at each layer
+bert_tokenizer = BertTokenizer.from_pretrained(pretrained_model)
+bert = BertModel.from_pretrained(pretrained_model).to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+
 
 
 def build_vocab(file_path, tokenizer, max_size, min_freq):
@@ -28,6 +37,17 @@ def build_vocab(file_path, tokenizer, max_size, min_freq):
     return vocab_dic
 
 
+def build_end(num):
+    res = ''
+    for i in range(num):
+        res += '|'
+    return res
+
+
+def pad_x(cur_x, num):
+    return np.append(cur_x, np.zeros([num]))
+
+
 def build_dataset(config, ues_word):
     if ues_word:
         tokenizer = lambda x: x.split(' ')  # 以空格隔开，word-level
@@ -40,7 +60,7 @@ def build_dataset(config, ues_word):
         pkl.dump(vocab, open(config.vocab_path, 'wb'))
     print(f"Vocab size: {len(vocab)}")
 
-    def load_dataset(path, pad_size=32):
+    def load_dataset(path, pad_size=config.pad_size):
         contents = []
         with open(path, 'r', encoding='UTF-8') as f:
             for line in tqdm(f):
@@ -49,23 +69,35 @@ def build_dataset(config, ues_word):
                     continue
                 content, label = lin.split('\t')
                 words_line = []
-                token = tokenizer(content)
-                seq_len = len(token)
-                if pad_size:
-                    if len(token) < pad_size:
-                        token.extend([vocab.get(PAD)] * (pad_size - len(token)))
-                    else:
-                        token = token[:pad_size]
-                        seq_len = pad_size
-                # word to id
-                for word in token:
-                    words_line.append(vocab.get(word, vocab.get(UNK)))
-                contents.append((words_line, int(label), seq_len))
+                if len(content) > pad_size:
+                    content = content[:pad_size]
+                if len(content) < pad_size:
+                    content += build_end(pad_size - len(content))
+                input_ids = torch.tensor([bert_tokenizer.encode(content)]).to(config.device)
+
+                # cur_x = encodes.view(encodes.shape[1], 1024).detach().cpu().numpy()
+                # padded_x = pad_x(cur_x, pad_size - cur_x.shape[0])
+                # if padded_x.shape != (pad_size, 1024):
+                #     print(padded_x.shape)
+                #     exit(-1)
+                cur_x = input_ids.view(input_ids.shape[1]).detach().cpu().numpy()
+                padded_x = pad_x(cur_x, pad_size - cur_x.shape[0])
+                words_line.append(padded_x)
+                outputs = bert(input_ids)
+                pooled_output = outputs[0].detach().cpu().numpy()
+                pooled_output = np.average(pooled_output, 1)
+                # print(pooled_output.shape)
+                del input_ids
+                del outputs
+                # print(words_line)
+                contents.append((pooled_output, int(label), pad_size))
+                # print(count)
         return contents  # [([...], 0), ([...], 1), ...]
 
     train = load_dataset(config.train_path, config.pad_size)
-    dev = load_dataset(config.train_path, config.pad_size)
+    dev = load_dataset(config.dev_path, config.pad_size)
     test = load_dataset(config.test_path, config.pad_size)
+    print(train[0])
     return vocab, train, dev, test
 
 
@@ -81,7 +113,7 @@ class DatasetIterater(object):
         self.device = device
 
     def _to_tensor(self, datas):
-        x = torch.LongTensor([_[0] for _ in datas]).to(self.device)
+        x = torch.FloatTensor([_[0] for _ in datas]).to(self.device)
         y = torch.LongTensor([_[1] for _ in datas]).to(self.device)
 
         # pad前的长度(超过pad_size的设为pad_size)
