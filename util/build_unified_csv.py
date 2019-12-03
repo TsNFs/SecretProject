@@ -1,12 +1,15 @@
 import csv
 import re
+import jieba
 
 from itertools import islice
 
-from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE
+from constant.system_path import TRAIN_DATA_FILE, TRAIN_DATA_LABEL_FILE, TEST_DATA_FILE, PYTORCH_TRAIN_FILE, \
+    PYTORCH_TEST_FILE
 from constant.constant import ID_LOC, TITLE_LOC, CONTENT_LOC, LABEL_LOC
 
-UNIFIED_FILE = '../data/train.csv'
+TRAIN_UNIFIED_FILE = '../data/train.csv'
+TEST_UNIFIED_FILE = '../data/test.csv'
 
 
 ##
@@ -39,17 +42,34 @@ def build_unified_file(id_label_dict):
     count = 0
     #
     with open(TRAIN_DATA_FILE, encoding='utf-8') as train_data:
-        with open(UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
-            unified_file.write('id,title,content,label\n')
+        with open(TRAIN_UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
+            unified_file.write('id\ttitle\tcontent\tlabel\n')
             data = csv.reader(train_data)
             for row in islice(data, 1, None):
                 if row[ID_LOC] in id_label_dict:
                     count += 1
-                    unified_file.write(row[ID_LOC] + ','
-                                       + row[TITLE_LOC] + ','
-                                       + content_filter(row[CONTENT_LOC]) + ','
+                    unified_file.write(row[ID_LOC] + '\t'
+                                       + content_filter(row[TITLE_LOC]) + '\t'
+                                       + content_filter(row[CONTENT_LOC]) + '\t'
                                        + id_label_dict[row[ID_LOC]]
                                        + '\n')
+    print('total data count: ' + str(count))
+
+
+def build_test_file():
+    # for human
+    count = 0
+    #
+    with open(TEST_DATA_FILE, encoding='utf-8') as test_data:
+        with open(TEST_UNIFIED_FILE, 'w', encoding='utf-8') as unified_file:
+            unified_file.write('id\ttitle\tcontent\n')
+            data = csv.reader(test_data)
+            for row in islice(data, 1, None):
+                count += 1
+                unified_file.write(row[ID_LOC] + '\t'
+                                   + content_filter(row[TITLE_LOC]) + '\t'
+                                   + content_filter(row[CONTENT_LOC])
+                                   + '\n')
     print('total data count: ' + str(count))
 
 
@@ -66,5 +86,30 @@ def content_filter(content):
     return content
 
 
+# transfer train data to title + label
+def transfer_train_data(form_path, to_path):
+    with open(form_path, encoding='utf-8') as data:
+        with open(to_path, 'w', encoding='utf-8') as file:
+            data = csv.reader(data, delimiter='\t')
+            for row in islice(data, 1, None):
+                #print(row)
+                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t'
+                           + row[3] + '\n')
+
+
+# transfer test data to title + label
+def transfer_test_data(form_path, to_path):
+    with open(form_path, encoding='utf-8') as data:
+        with open(to_path, 'w', encoding='utf-8') as file:
+            data = csv.reader(data, delimiter='\t')
+            for row in islice(data, 1, None):
+                file.write(word_cut(content_filter(row[1]) + ',' + content_filter(row[2])) + '\t' + '1\n')
+
+def word_cut(content):
+    return ' '.join(jieba.cut(content))
+
 if __name__ == '__main__':
     build_unified_file(build_id_label_dict())
+    build_test_file()
+    transfer_train_data(TRAIN_UNIFIED_FILE, PYTORCH_TRAIN_FILE)
+    transfer_test_data(TEST_UNIFIED_FILE, PYTORCH_TEST_FILE)
