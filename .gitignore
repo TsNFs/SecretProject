@@ -5,3 +5,4 @@ nn/xkf_nn_model
 nn/__pycache__
 util/__pycache__
 tsne.png
+result.csv
